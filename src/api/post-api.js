@@ -11,7 +11,17 @@ const getPostList = async () => {
 		});
 };
 
+const getCommentList = async () => {
+	return axios
+		.get("https://jsonplaceholder.typicode.com/comments")
+		.then(res => res.data)
+		.catch(e => {
+			console.error(e);
+		});
+};
+
 
 export const postApi = {
-	getPostList
+	getPostList,
+	getCommentList
 };
