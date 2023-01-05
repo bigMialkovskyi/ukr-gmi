@@ -9,7 +9,9 @@
     <p class="comments-count">
       {{ post.comments.length }}
     </p>
+    <!-- <button @click="createChart">show statistics</button> -->
     <div>
+      <!-- <canvas :id="`chart-${post.id}`" v-if="showCanvas"></canvas> -->
       <canvas :id="`chart-${post.id}`"></canvas>
     </div>
   </li>
@@ -21,6 +23,14 @@ import Chart from "chart.js/auto";
 export default {
   name: "PostElement",
 
+  data: function () {
+    return {
+      emails: [],
+      emailLength: [],
+      showCanvas: false,
+    };
+  },
+
   props: {
     post: {
       type: Object,
@@ -29,26 +39,49 @@ export default {
   },
 
   mounted() {
-    new Chart(document.querySelector(`#chart-${this.post.id}`), {
-      type: "bar",
-      data: {
-        labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
-        datasets: [
-          {
-            label: "# of Votes",
-            data: [12, 19, 3, 5, 2, 3],
-            borderWidth: 1,
-          },
-        ],
-      },
-      options: {
-        scales: {
-          y: {
-            beginAtZero: true,
+    this.createChart();
+  },
+
+  created: async function () {},
+
+  methods: {
+    getStatistics() {
+      this.emails.length = 0;
+      this.emailLength.length = 0;
+
+      for (let i = 0; i < this.post.comments.length; i++) {
+        this.emailLength.push(
+          Object.assign({}, this.post.comments[i]).email.length
+        );
+        this.emails.push(Object.assign({}, this.post.comments[i]).email);
+      }
+      // this.showCanvas = !this.showCanvas;
+      // console.log(this.showCanvas)
+      return Array.from(this.emailLength);
+    },
+
+    createChart() {
+      new Chart(document.querySelector(`#chart-${this.post.id}`), {
+        type: "bar",
+        data: {
+          labels: this.emails,
+          datasets: [
+            {
+              label: "# the number of characters in the mail",
+              data: this.getStatistics(),
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true,
+            },
           },
         },
-      },
-    });
+      });
+    },
   },
 };
 </script>

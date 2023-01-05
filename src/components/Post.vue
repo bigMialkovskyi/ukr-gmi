@@ -52,7 +52,12 @@ export default {
     };
   },
 
-  created: async function () {
+  // created: async function () {
+  //   this.postList();
+  //   this.commentsList();
+  // },
+
+  mounted: async function () {
     this.postList();
     this.commentsList();
   },
