@@ -6,12 +6,13 @@
     <p class="post-body">
       {{ post.body }}
     </p>
-    <p class="comments-count">
-      {{ post.comments.length }}
-    </p>
-    <!-- <button @click="createChart">show statistics</button> -->
+    <div class="comment-counter">
+      <img class="comment-icon" src="../assets/comment.svg" alt="" />
+      <p class="comments-count">
+        {{ post.comments.length }}
+      </p>
+    </div>
     <div>
-      <!-- <canvas :id="`chart-${post.id}`" v-if="showCanvas"></canvas> -->
       <canvas :id="`chart-${post.id}`"></canvas>
     </div>
   </li>
@@ -42,33 +43,32 @@ export default {
     this.createChart();
   },
 
-  created: async function () {},
-
   methods: {
     getStatistics() {
-      this.emails.length = 0;
-      this.emailLength.length = 0;
+      const emails = [];
+      const emailLength = [];
 
-      for (let i = 0; i < this.post.comments.length; i++) {
-        this.emailLength.push(
-          Object.assign({}, this.post.comments[i]).email.length
-        );
-        this.emails.push(Object.assign({}, this.post.comments[i]).email);
-      }
-      // this.showCanvas = !this.showCanvas;
-      // console.log(this.showCanvas)
-      return Array.from(this.emailLength);
+      this.post.comments.forEach((comment, index) => {
+        emailLength.push(comment.email.length);
+        emails.push(comment.email);
+      });
+      return {
+        emails,
+        emailLength,
+      };
     },
 
     createChart() {
+      const { emails, emailLength } = this.getStatistics();
+      console.log(emails, emailLength);
       new Chart(document.querySelector(`#chart-${this.post.id}`), {
         type: "bar",
         data: {
-          labels: this.emails,
+          labels: emails,
           datasets: [
             {
               label: "# the number of characters in the mail",
-              data: this.getStatistics(),
+              data: emailLength,
               borderWidth: 1,
             },
           ],
@@ -94,16 +94,15 @@ export default {
 .posts-list {
   display: flex;
   justify-content: space-evenly;
-  // width: 1000px;
   flex-wrap: wrap;
 }
 
 .post-element {
-  // height: 200px;
   width: 30%;
   border: 2px solid blue;
   border-radius: 5px;
   margin-bottom: 5px;
+  background-color: #e6f5ff;
 }
 
 .post-title {
@@ -113,6 +112,22 @@ export default {
 
 .post-body {
   font-size: 12px;
+}
+
+.comment-counter{
+  display: flex;
+  justify-content: end;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.comment-icon {
+  width: 30px;
+  height: 30px;
+}
+
+.comments-count{
+  font-weight: bold;
 }
 
 h3 {

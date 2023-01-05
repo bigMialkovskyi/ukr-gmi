@@ -1,26 +1,18 @@
 <template>
   <div class="container">
-    <input type="text" v-model="searchText" />
-    <ul class="posts-list">
-      <!-- <li class="post-element" v-for="post in displayedPosts" :key="post.id">
-        <h6 class="post-title">
-          {{ post.title }}
-        </h6>
-        <p class="post-body">
-          {{ post.body }}
-        </p>
-        <p v-if="comments.length" class="comments-count">
-          {{ getPostComments(post.id).length }}
-        </p>
-      </li> -->
-      <PostElement
-        v-for="post in displayedPosts"
-        :key="post.id"
-        :post="{ ...post, comments: getPostComments(post.id) }"
-      />
+    <input class="input-text" type="text" v-model="searchText" />
+    <ul v-if="posts.length" class="posts-list">
+      <PostElement v-for="post in displayedPosts" :key="post.id" :post="post" />
     </ul>
-    <button @click="currentPage -= 1" :disabled="!hasPrev">Prev</button>
-    <button @click="currentPage += 1" :disabled="!hasNext">Next</button>
+    <div class="paginate-nav">
+      <button class="nav-btn" @click="currentPage -= 1" :disabled="!hasPrev">
+        Prev
+      </button>
+      <div>{{ currentPage + 1 }} of {{ totalPages }}</div>
+      <button class="nav-btn" @click="currentPage += 1" :disabled="!hasNext">
+        Next
+      </button>
+    </div>
   </div>
 </template>
 
@@ -40,7 +32,6 @@ export default {
       posts: [],
       displayedPosts: [],
       filteredPosts: null,
-      comments: [],
       perPage: 10,
       totalPages: null,
       error: null,
@@ -52,24 +43,24 @@ export default {
     };
   },
 
-  // created: async function () {
-  //   this.postList();
-  //   this.commentsList();
-  // },
-
   mounted: async function () {
-    this.postList();
-    this.commentsList();
+    const posts = await this.postList();
+    const comments = await this.commentsList();
+
+    this.posts = posts.map((post) => {
+      post.comments = comments.filter((comment) => comment.postId === post.id);
+      return post;
+    });
+    this.paginate();
   },
 
   methods: {
     async postList() {
-      this.posts = await postApi.getPostList();
-      this.paginate();
+      return await postApi.getPostList();
     },
 
     async commentsList() {
-      this.comments = await postApi.getCommentList();
+      return await postApi.getCommentList();
     },
 
     paginate() {
@@ -109,21 +100,28 @@ export default {
 };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 .container {
   padding: 0 5%;
   display: block;
 }
+
+.input-text {
+  height: 40px;
+  width: 400px;
+  border-radius: 7px;
+  background-color: #ccebff;
+  border: 2px solid #0099ff;
+  box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.5);
+}
+
 .posts-list {
   display: flex;
   justify-content: space-evenly;
-  // width: 1000px;
   flex-wrap: wrap;
 }
 
 .post-element {
-  // height: 200px;
   width: 30%;
   border: 2px solid blue;
   border-radius: 5px;
@@ -137,6 +135,32 @@ export default {
 
 .post-body {
   font-size: 12px;
+}
+
+.paginate-nav {
+  padding: 20px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  background-color: #b3e0ff;
+  border-radius: 7px;
+}
+
+.nav-btn {
+  background-color: #0099ff;
+  width: 80px;
+  height: 40px;
+  border-radius: 5px;
+  border: 2px solid #0099ff;
+  box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.5);
+}
+
+.nav-btn:hover {
+  background-color: #33adff;
+}
+
+.nav-btn:active {
+  background-color: #007acc;
 }
 
 h3 {
